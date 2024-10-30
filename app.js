@@ -23,12 +23,10 @@ app.use(express.json());
 // Routers
 const childrenRouter = require('./routes/children/child');
 const visitsRouter = require('./routes/children/visits');
-const visits2to5Router = require('./routes/children/visits2to5');
 const authRouter = require('./routes/auth');
 
 app.use('/api/children', childrenRouter);
 app.use('/api/visits', visitsRouter);
-app.use('/api/visits2to5', visits2to5Router);
 app.use('/api/auth', authRouter);
 
 app.listen(PORT, () => {

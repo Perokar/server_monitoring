@@ -26,7 +26,6 @@ router.post('/register', async (req, res) => {
       region,
       district,
       cpmsd,
-      category,
       role: role || 'nurse'
     });
 

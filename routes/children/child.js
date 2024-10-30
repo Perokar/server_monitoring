@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const Child = require('../../models/Child');
+const Child = require('../../models/Child'); // Модель дитини
+const Visit = require('../../models/Visit'); // Модель Visit
+const Visit2to5 = require('../../models/Visits2to5'); // Модель Visit2to5
 const authMiddleware = require('../../middleware/auth');
 
 router.post ('/test_route',(req,res) => {
@@ -20,13 +22,13 @@ router.post('/add_child', authMiddleware, async (req, res) => {
 catch(err) {
   console.log(`Помилка ${err}`)
 }
-  const child = new Child({
+  const newChild = new Child({
     ...req.body,
     nurseId: nurseId
   });
 
   try {
-    const newChild = await child.save();
+   const newCh = await newChild.save();
     res.status(201).json("Клієнта додано");
   } catch (err) {
     res.status(400).json({ message: err.message });
@@ -57,30 +59,34 @@ router.post('/schedule_visit', async (req, res) => {
       return res.status(404).json({ message: 'Child not found' });
     }
 
-    // Перевірка наявності запланованого візиту такого типу
-    const existingVisitIndex = child.sheduledVisits.findIndex(visit => visit.type === visitType);
+    // Перевірка наявності проведеного візиту з таким типом у колекціях Visits або Visits2to5
+    const existingVisit = await Visit.findOne({ childId, visitType });
+    const existingVisit2to5 = await Visit2to5.findOne({ childId, visitType });
 
-    if (existingVisitIndex !== -1) {
+    if (existingVisit || existingVisit2to5) {
+      return res.status(400).json({ message: 'Неможливо запланувати візит, бо його вже було проведено' });
+    }
+
+    // Перевірка наявності запланованого візиту такого типу
+    const existingScheduledVisitIndex = child.sheduledVisits.findIndex(visit => visit.type === visitType);
+
+    if (existingScheduledVisitIndex !== -1) {
       // Замінити поле date на значення, яке прийшло в запиті
-      child.sheduledVisits[existingVisitIndex].date = visitDate;
+      child.sheduledVisits[existingScheduledVisitIndex].date = visitDate;
     } else {
       // Додавання нового запланованого візиту
       child.sheduledVisits.push({ type: visitType, date: visitDate });
     }
 
-    // Якщо тип візиту "other", додати до масиву об'єкт visitType
-    if (visitType === 'other') {
-      child.sheduledVisits.push({ type: visitType, date: visitDate });
-    }
-
     await child.save();
 
-    res.status(200).json({ message: 'Visit scheduled successfully', child });
+    res.status(200).json({ message: 'Візит заплановано', child });
   } catch (error) {
-    console.error('Error scheduling visit:', error);
+    console.error('Помилка запланування візиту', error);
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+
 // Other CRUD routes (get, update, delete)
 
 module.exports = router;
