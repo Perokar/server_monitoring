@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   district: { type: String, required: true },
   region: { type: String, required: true },
   cpmsd: { type: String, required: true }, 
-  role: { type: String, enum: ['nurse', 'admin', 'cpmsd', 'mentorUA'], required: true },
+  role: { type: String, enum: ['nurse','seniorNurse','coordinatorDoctor', 'headCpmsd', 'supervisor','coordinatorRegion', 'coordinatorUa','admin'], required: true },
   approve: { type: Boolean, default: false }
 });
 

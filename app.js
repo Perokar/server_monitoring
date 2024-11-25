@@ -5,6 +5,10 @@ require('dotenv').config();
 
 
 const app = express();
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN,
+  optionsSuccessStatus: 200
+}
 app.use(cors());
 const PORT = process.env.PORT || 3000;
 
@@ -21,8 +25,8 @@ db.once('open', () => {
 app.use(express.json());
 
 // Routers
-const childrenRouter = require('./routes/children/child');
-const visitsRouter = require('./routes/children/visits');
+const childrenRouter = require('./routes/Nurse/children/child');
+const visitsRouter = require('./routes/Nurse/children/visits');
 const authRouter = require('./routes/auth');
 
 app.use('/api/children', childrenRouter);
