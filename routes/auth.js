@@ -23,7 +23,6 @@ router.post('/register', async (req, res) => {
       login,
       password: hashedPassword,
       fullName,
-      region,
       district,
       cpmsd,
       role: role || 'nurse'

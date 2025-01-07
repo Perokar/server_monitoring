@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const visitSchema = new mongoose.Schema({
   clientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Client', required: true },
   nurseId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }, // Медсестра, що робить візит
+  visitDate: { type: Date, required: true }, // Дата візиту
   ageAtVisit: { type: Number, required: true }, // Вік на момент візиту (в днях)
   visitCompleted: { type: String, required: true }, // Візит проведено / Візит заплановано
   visitDuration: { type: Number, required: true }, // Тривалість візиту (хвилини)

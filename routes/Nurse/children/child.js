@@ -70,7 +70,6 @@ router.post('/schedule_visit', async (req, res) => {
 
     // Перевірка наявності запланованого візиту такого типу
     const existingScheduledVisitIndex = child.sheduledVisits.findIndex(visit => visit.type === visitType);
-    console.log(existingScheduledVisitIndex)
     if (existingScheduledVisitIndex !== -1) {
       const schDate = child.sheduledVisits[existingScheduledVisitIndex].date;
       // Замінити поле date на значення, яке прийшло в запиті
@@ -88,7 +87,60 @@ router.post('/schedule_visit', async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 });
+router.get('/search_visits', authMiddleware, async (req, res) => {
+  const nurseId = req.user._id; // Отримання nurseId з токена
+  const { startDate, endDate, month, year } = req.query;
+  try {
+    let start, end;
+    const searchYear = year ? parseInt(year) : new Date().getFullYear();
+    if (month) {
+      start = new Date(searchYear, month - 1, 1);
+      end = new Date(searchYear, month, 0);
+      console.log(start, typeof start, end, typeof end);
+      
+    } else if (startDate && endDate) {
+      start = new Date(startDate);
+      end = new Date(endDate);
+    } else {
+      return res.status(400).json({ message: 'Необхідно вказати або місяць, або startDate і endDate' });
+    }
 
+    // Знайти всіх дітей, прив'язаних до цієї медсестри, і фільтрувати візити за період
+    const children = await Child.find({ nurseId });
+
+    // Форматування результатів
+    const visits = children.flatMap(child => {
+      const visitsHistory = child.visitsHistory.filter(visit => {
+        const visitDate = new Date(visit.date);
+        return visitDate >= start && visitDate <= end;
+      }).map(visit => ({
+        id: child._id,
+        date: visit.date,
+        fullName: child.fullName,
+        visitNumber: visit.type,
+        sheduledVisit: 'completed'
+      }));
+
+      const sheduledVisits = child.sheduledVisits.filter(visit => {
+        const visitDate = new Date(visit.date);
+        return visitDate >= start && visitDate <= end;
+      }).map(visit => ({
+        id: child._id,
+        date: visit.date,
+        fullName: child.fullName,
+        visitNumber: visit.type,
+        sheduledVisit: visit.status
+      }));
+
+      return [...visitsHistory, ...sheduledVisits];
+    });
+
+    return res.status(200).json({ visits });
+}
+   catch (error) {
+      return res.status(500).json({ message: 'Проблеми з сервером або базою клієнтів', error: error.message });
+  }
+});
 // Other CRUD routes (get, update, delete)
 
 module.exports = router;

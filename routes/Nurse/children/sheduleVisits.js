@@ -23,4 +23,5 @@ router.post('/get_all_visits', authMiddleware, async (req, res) => {
         return res.status(500).json({ message: 'Проблеми з сервером або базою клієнтів', error });
     }
 })
+
 module.exports = router;
