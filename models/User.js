@@ -5,10 +5,9 @@ const userSchema = new mongoose.Schema({
   login: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   fullName: { type: String, required: true },
-  district: { type: String, required: true },
   region: { type: String, required: true },
   cpmsd: { type: String, required: true }, 
-  role: { type: String, enum: ['nurse','seniorNurse','coordinatorDoctor', 'headCpmsd', 'supervisor','coordinatorRegion', 'coordinatorUa','admin'], required: true },
+  role: { type: String, enum: ['nurse','seniorNurse','coordinatorDoctor', 'headCpmsd', 'supervisor','coordinatorRegion', 'coordinatorUa','admin', 'mainAdmin'], required: true },
   approve: { type: Boolean, default: false }
 });
 
