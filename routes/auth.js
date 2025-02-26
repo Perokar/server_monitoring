@@ -1,22 +1,20 @@
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const User = require('../models/user');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); 
 
-// Registration route
-router.post('/register', async (req, res) => {
+
+const register = async (req, res, approveDefault = false ) =>{
   try {
-    const { login, password, fullName, region, cpmsd, role, approve } = req.body;
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ login });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+  const { login, password, fullName, region, cpmsd, role, approve } = req.body;
+  // Check if user already exists
+  const existingUser = await User.findOne({ login });
+  if (existingUser) {
+    return res.status(400).json({ message: 'Користувач з таким логіном вже існує' });
+  }
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
-
     // Create new user
     const user = new User({
       login,
@@ -25,22 +23,19 @@ router.post('/register', async (req, res) => {
       region,
       cpmsd,
       role: role || 'nurse',
-      approve: approve || false
+      approve: approve !== undefined ? approve : approveDefault
     });
-
     // Save user to the database
     const newUser = await user.save();
-
-    // Generate JWT token for the user
-    const token = jwt.sign({ _id: newUser._id, role: newUser.role }, process.env.JWT_SECRET, {
-      expiresIn: '1h'
-    });
-
-    res.status(201).json({ message: 'Користувача успішно зареєстровано', token });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(201).json({ message: 'Користувача успішно зареєстровано', newUser });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   }
-});
+  
+// Роут реєстрації
+router.post('/register', register(req, res));
+
 router.post('/register-m-admin', async (req, res) => {
     const {login, password, fullName, region, cpmsd, role} = req.body;
   try {
@@ -79,6 +74,7 @@ router.post('/register-m-admin', async (req, res) => {
       res.status(500).json({ message: 'Помилка сервера', error: error.message });
     }    
 });
+
 // Login route
 router.post('/login', async (req, res) => {
   try {
@@ -97,4 +93,4 @@ router.post('/login', async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = {router, register};
