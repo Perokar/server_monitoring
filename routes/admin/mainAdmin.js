@@ -1,8 +1,8 @@
 const express = require('express');
-const router = express.Router();
 const User = require('../../models/user');
 const authenticateToken = require('../../middleware/auth');
 const checkRole = require('../../middleware/roleCheck');
+const router = express.Router();
 const bcrypt = require('bcrypt');
 
 // Отримання даних про всіх користувачів, крім пароля
@@ -27,7 +27,7 @@ router.post('/add-user', authenticateToken, checkRole('mainAdmin'), async (req, 
 });
 
 // Редагування даних користувача
-router.post('/edit-user', authenticateToken, checkRole('mainAdmin'), async (req, res) => {
+router.post('/edit-user', authenticateToken,checkRole('mainAdmin'), async (req, res) => {
   try {
     const { userId, updateData } = req.body;
     const user = await User.findByIdAndUpdate(userId, updateData, { new: true, runValidators: true });
@@ -38,11 +38,8 @@ router.post('/edit-user', authenticateToken, checkRole('mainAdmin'), async (req,
 });
 
 // Видалення користувача
-router.post('/remove-user', authenticateToken, async (req, res) => {
+router.post('/remove-user', authenticateToken,checkRole('mainAdmin'), async (req, res) => {
   try {
-    if (req.user.role !== 'mainAdmin') {
-      return res.status(403).json({ message: 'Доступ заборонено' });
-    }
     const { userId } = req.body;
     const removeUser =await User.findByIdAndDelete(userId);
     if (!removeUser) {
@@ -55,11 +52,8 @@ router.post('/remove-user', authenticateToken, async (req, res) => {
 });
 
 // Зміна пароля користувача
-router.post('/change-password', authenticateToken, async (req, res) => {
+router.post('/change-password', authenticateToken, checkRole('mainAdmin'), async (req, res) => {
   try {
-    if (req.user.role !== 'mainAdmin') {
-      return res.status(403).json({ message: 'Доступ заборонено' });
-    }
     const { userId, newPassword } = req.body;
     const user = await User.findById(userId);
     const hashedPassword = await bcrypt.hash(newPassword, 10);

@@ -13,6 +13,9 @@ const register = async (req, res, approveDefault = false ) =>{
   if (existingUser) {
     return res.status(400).json({ message: 'Користувач з таким логіном вже існує' });
   }
+  if (role === 'mainAdmin'||role === 'adminCpmsd'||role === 'adminRegion') {
+    return res.status(403).json({ message: 'Немає прав на створення користувача з такою роллю' });
+  }
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
     // Create new user
@@ -34,15 +37,15 @@ const register = async (req, res, approveDefault = false ) =>{
   }
   
 // Роут реєстрації
-router.post('/register', register(req, res));
+ router.post('/register',(req,res)=>register(req,res, approveDefault=true));
 
 router.post('/register-m-admin', async (req, res) => {
     const {login, password, fullName, region, cpmsd, role} = req.body;
   try {
       //Перевірка головного адміністратора
       const mainAdminExist = await User.find({ role: 'mainAdmin' });
-      if (mainAdminExist.length > 2 && role === 'mainAdmin') {
-        return res.status(403).json({ message: 'Доступ заборонено' });
+      if (mainAdminExist.length > 3 && role === 'mainAdmin') {
+        return res.status(403).json({ message: 'Кількість адмінів достатня' });
       }
     } catch (error) {
       res.status(500).json({ message: 'Помилка сервера', error: error.message });
@@ -71,7 +74,7 @@ router.post('/register-m-admin', async (req, res) => {
       res.status(201).json({ message: 'Користувача успішно зареєстровано', newAdmin });  
     }
     catch (error) {
-      res.status(500).json({ message: 'Помилка сервера', error: error.message });
+      res.status(501).json({ message: 'Помилка запису в базу', error: error.message });
     }    
 });
 
