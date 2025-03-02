@@ -3,7 +3,7 @@ const router = express.Router();
 const Child = require('../../../models/Child'); // Модель дитини
 const Visit = require('../../../models/Visit'); // Модель Visit
 const Visit2to5 = require('../../../models/Visits2to5'); // Модель Visit2to5
-const authMiddleware = require('../../../middleware/auth');
+const authMiddleware = require('../../../middleware/Auth');
 
 router.post ('/test_route',(req,res) => {
   console.log('Test route works '+JSON.stringify(req.headers));

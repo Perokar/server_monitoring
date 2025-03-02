@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const userSchema = new mongoose.Schema({
+const confirmUserSchema = new mongoose.Schema({
   login: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
   phone: { type: String, required: true, unique: true },
@@ -13,14 +13,14 @@ const userSchema = new mongoose.Schema({
 });
 
 // Хешування пароля перед збереженням
-userSchema.pre('save', async function(next) {
+confirmUserSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
-userSchema.methods.validatePassword = async function (password) {
+confirmUserSchema.methods.validatePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
-const User = mongoose.model('User', userSchema);
+const confirmUser = mongoose.model('confirmUser', confirmUserSchema);
 
-module.exports = User;
+module.exports = confirmUser;

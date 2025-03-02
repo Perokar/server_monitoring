@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Child = require('../../../models/Child');
-const authMiddleware = require('../../../middleware/auth');
+const authMiddleware = require('../../../middleware/Auth');
 const Visit2to5 = require('../../../models/Visits2to5');
 const Visit = require('../../../models/Visit'); // Add this line to import the Visit model
 
